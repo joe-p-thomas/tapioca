@@ -1,4 +1,15 @@
 GIT
+  remote: https://github.com/Shopify/rbi.git
+  revision: 0cd74121824f9059a7ccb170d21bbe1b02f33781
+  branch: main
+  specs:
+    rbi (0.0.11)
+      ast
+      parser
+      sorbet-runtime (>= 0.5.9204)
+      unparser
+
+GIT
   remote: https://github.com/csfrancis/cityhash.git
   revision: 3cfc7d01f333c01811d5e834f1495eaa29f87c36
   ref: 3cfc7d01f333c01811d5e834f1495eaa29f87c36
@@ -225,11 +236,6 @@ GEM
       thor (~> 1.0)
     rainbow (3.1.1)
     rake (13.0.6)
-    rbi (0.0.11)
-      ast
-      parser
-      sorbet-runtime (>= 0.5.9204)
-      unparser
     redis (4.5.1)
     regexp_parser (2.2.0)
     rexml (3.2.5)
@@ -328,6 +334,7 @@ DEPENDENCIES
   pry-byebug
   rails
   rake
+  rbi!
   rubocop-lsp
   rubocop-rspec
   rubocop-shopify
