@@ -103,7 +103,8 @@ module Tapioca
                   event.create_method(
                     method,
                     parameters: [
-                      create_block_param("block", type: "T.proc.bind(#{constant.name}).void"),
+                      create_opt_param("symbol", type: "T.nilable(Symbol)", default: "nil"),
+                      create_block_param("block", type: "T.nilable(T.proc.bind(#{constant.name}).void)"),
                     ]
                   )
                 end
