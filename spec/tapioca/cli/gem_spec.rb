@@ -1123,6 +1123,82 @@ module Tapioca
           refute_success_status(result)
         end
       end
+
+      describe "sigils" do
+        before(:all) do
+          @project.tapioca("init")
+        end
+
+        after do
+          project.gemfile(project.tapioca_gemfile)
+          project.remove("sorbet/rbi")
+          project.remove("../gems")
+        end
+
+        it "must turn the sigil of files with error to false" do
+          foo = mock_gem("foo", "0.0.1") do
+            write("lib/foo.rb", <<~RB)
+              module Foo
+                def foo(a, b, c); end
+              end
+            RB
+          end
+
+          bar = mock_gem("bar", "0.3.0") do
+            write("lib/bar.rb", <<~RB)
+              module Bar
+                def bar(a, b, c); end
+              end
+            RB
+          end
+
+          baz = mock_gem("baz", "1.0.0") do
+            write("lib/baz.rb", <<~RB)
+              module Baz
+                def baz(a, b, c); end
+              end
+            RB
+          end
+
+          @project.gemfile(<<~GEMFILE, append: true)
+            #{foo.gemfile_line}
+            #{bar.gemfile_line}
+            #{baz.gemfile_line}
+          GEMFILE
+
+          @project.bundle_install
+
+          @project.write("sorbet/rbi/dsl/foo.rbi", <<~RBI)
+            # typed: true
+
+            module Foo
+              def foo(a, b, c); end
+            end
+
+            module Bar
+              def bar(a, b); end
+            end
+
+            module Baz
+              def baz; end
+            end
+          RBI
+
+          result = @project.tapioca("gem --all")
+
+          foo_sigil = Spoom::Sorbet::Sigils.file_strictness(@project.absolute_path("sorbet/rbi/gems/foo@0.0.1.rbi"))
+          assert_equal("true", foo_sigil)
+
+          bar_sigil = Spoom::Sorbet::Sigils.file_strictness(@project.absolute_path("sorbet/rbi/gems/bar@0.3.0.rbi"))
+          assert_equal("false", bar_sigil)
+
+          baz_sigil = Spoom::Sorbet::Sigils.file_strictness(@project.absolute_path("sorbet/rbi/gems/baz@1.0.0.rbi"))
+          assert_equal("false", baz_sigil)
+
+          assert_empty_stderr(result)
+          assert_success_status(result)
+        end
+      end
     end
   end
 end

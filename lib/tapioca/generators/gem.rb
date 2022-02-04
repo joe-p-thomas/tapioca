@@ -4,6 +4,8 @@
 module Tapioca
   module Generators
     class Gem < Base
+      include SorbetHelper
+
       sig do
         params(
           gem_names: T::Array[String],
@@ -71,6 +73,8 @@ module Tapioca
         end
 
         if anything_done
+          set_files_sigils
+
           say("All operations performed in working directory.", [:green, :bold])
           say("Please review changes and commit them.", [:green, :bold])
         else
@@ -367,6 +371,30 @@ module Tapioca
       rescue RBI::ParseError => e
         say_error("\n\n  RBIs exported by `#{gem.name}` contain errors and can't be used:", :yellow)
         say_error("Cause: #{e.message} (#{e.location})")
+      end
+
+      sig { void }
+      def set_files_sigils
+        # TODO: configure dirs
+        # TODO: only in asked for gems
+        # TODO: output warnings
+        return unless File.directory?(DEFAULT_DSL_DIR)
+
+        error_url_base = Spoom::Sorbet::Errors::DEFAULT_ERROR_URL_BASE
+
+        _, err, _ = sorbet(
+          "--no-config",
+          "--error-url-base=#{error_url_base}",
+          "--isolate-error-code 4010",
+          DEFAULT_DSL_DIR,
+          DEFAULT_GEM_DIR,
+          quiet: false
+        )
+
+        Spoom::Sorbet::Errors::Parser.parse_string(err)
+          .map(&:file)
+          .compact
+          .each { |file| Spoom::Sorbet::Sigils.change_sigil_in_file(file, "false") }
       end
     end
   end
