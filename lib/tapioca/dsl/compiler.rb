@@ -27,19 +27,6 @@ module Tapioca
       sig { returns(RBI::Tree) }
       attr_reader :root
 
-      sig { params(name: String).returns(T.nilable(T.class_of(Compiler))) }
-      def self.resolve(name)
-        # Try to find built-in tapioca compiler first, then globally defined compiler.
-        potentials = ["Tapioca::Dsl::Compilers::#{name}", name].map do |potential_name|
-          Object.const_get(potential_name)
-        rescue NameError
-          # Skip if we can't find compiler by the potential name
-          nil
-        end
-
-        potentials.compact.first
-      end
-
       sig { params(pipeline: Tapioca::Dsl::Pipeline, root: RBI::Tree, constant: Elem).void }
       def initialize(pipeline, root, constant)
         @pipeline = pipeline

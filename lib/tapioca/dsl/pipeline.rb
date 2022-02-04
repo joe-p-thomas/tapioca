@@ -88,7 +88,7 @@ module Tapioca
       sig { params(compiler_name: String).returns(T::Boolean) }
       def compiler_enabled?(compiler_name)
         @compilers.any? do |compiler|
-          ["Tapioca::Compilers::Dsl::#{compiler_name}", compiler_name].any?(compiler.name)
+          ["Tapioca::Dsl::Compilers::#{compiler_name}", compiler_name].any?(compiler.name)
         end
       end
 
